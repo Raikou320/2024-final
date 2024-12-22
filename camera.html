@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo camera</title>
+  </head>
+  <body>
+    <canvas
+      id="canvas"
+      width="800"
+      height="600"
+      style="border: 1px solid black"
+    ></canvas>
+    <script>
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const worldWidth = 1600;
+      const worldHeight = 1200;
+      const playerWidth = 50;
+      const playerHeight = 50;
+      let playerX = worldWidth / 2 - playerWidth / 2;
+      let playerY = worldHeight / 2 - playerHeight / 2;
+      let cameraX, cameraY;
+
+      function updateCamera() {
+        cameraX = playerX - canvas.width / 2;
+        cameraY = playerY - canvas.height / 2;
+        cameraX = Math.max(0, Math.min(cameraX, worldWidth - canvas.width));
+        cameraY = Math.max(0, Math.min(cameraY, worldHeight - canvas.height));
+      }
+
+      function drawRect(objX, objY, width, height, color) {
+        const canvasX = objX - cameraX;
+        const canvasY = objY - cameraY;
+        ctx.fillStyle = color;
+        ctx.fillRect(canvasX, canvasY, width, height);
+      }
+
+      function drawMiniMap() {
+        const mapWidth = 200; // Largeur de la mini-map
+        const mapHeight = 150; // Hauteur de la mini-map
+        const scaleX = mapWidth / worldWidth;
+        const scaleY = mapHeight / worldHeight;
+
+        // Fond de la mini-map
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(canvas.width - mapWidth - 10, 10, mapWidth, mapHeight);
+
+        // Position du joueur
+        ctx.fillStyle = 'red';
+        ctx.fillRect(
+          canvas.width - mapWidth - 10 + playerX * scaleX,
+          10 + playerY * scaleY,
+          playerWidth * scaleX,
+          playerHeight * scaleY
+        );
+        
+        // Vue de la caméra
+        ctx.strokeStyle = 'white';
+        ctx.strokeRect(
+          canvas.width - mapWidth - 10 + cameraX * scaleX,
+          10 + cameraY * scaleY,
+          canvas.width * scaleX,
+          canvas.height * scaleY
+        );
+      }
+
+      function gameLoop() {
+        updateCamera();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawRect(0, 0, worldWidth, worldHeight, 'lightblue');
+        drawMiniMap();
+        drawRect(playerX, playerY, playerWidth, playerHeight, 'red');
+        requestAnimationFrame(gameLoop);
+      }
+      gameLoop();
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'q') {
+          playerX -= 5;
+        }
+        if (e.key === 'd') {
+          playerX += 5;
+        }
+        if (e.key === 'z') {
+          playerY -= 5;
+        }
+        if (e.key === 's') {
+          playerY += 5;
+        }
+      });
+    </script>
+  </body>
+</html>
